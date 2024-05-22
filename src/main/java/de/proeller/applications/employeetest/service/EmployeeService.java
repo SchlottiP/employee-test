@@ -3,11 +3,14 @@ package de.proeller.applications.employeetest.service;
 import de.proeller.applications.employeetest.controller.dto.CreateEmployeeRequestDto;
 import de.proeller.applications.employeetest.controller.dto.EmployeeResponseDto;
 import de.proeller.applications.employeetest.controller.dto.UpdateEmployeeRequestDto;
+import de.proeller.applications.employeetest.exception.CustomRuntimeException;
 import de.proeller.applications.employeetest.kafka.KafkaProducer;
 import de.proeller.applications.employeetest.model.Employee;
 import de.proeller.applications.employeetest.repository.EmployeeRepository;
 import de.proeller.applications.employeetest.service.mapper.EmployeeMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -32,9 +35,17 @@ public class EmployeeService {
 
     public EmployeeResponseDto createEmployee(CreateEmployeeRequestDto toCreate) {
         Employee employeeEntityToSave = employeeMapper.toEntity(toCreate);
+        validateIfEmployeeMailAlreadyExists(employeeEntityToSave);
         Employee savedEmployee = employeeRepository.save(employeeEntityToSave);
         kafkaProducer.sendMessage("Employee created: " + savedEmployee.getId());
         return employeeMapper.toResponseDto(savedEmployee);
+    }
+
+    private void validateIfEmployeeMailAlreadyExists(Employee employee) {
+        Optional<Employee> alreadyExisting = employeeRepository.findByEmail(employee.getEmail());
+        if(alreadyExisting.isPresent()){
+            throw new CustomRuntimeException(HttpStatus.CONFLICT, "Email-Address is already used by user with id " + alreadyExisting.get().getId(), "E-Mail Address is already in use.");
+        }
     }
 
     public List<EmployeeResponseDto> getAllEmployees() {
