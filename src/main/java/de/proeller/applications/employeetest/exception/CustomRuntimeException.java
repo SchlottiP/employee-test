@@ -8,6 +8,7 @@ public class CustomRuntimeException extends RuntimeException {
 
     @Getter
     private final String userMessage;
+    @Getter
     private final HttpStatusCode statusCode;
 
     public CustomRuntimeException(String logMessage, String userMessage) {
@@ -22,7 +23,4 @@ public class CustomRuntimeException extends RuntimeException {
     }
 
 
-    public HttpStatusCode getStatusCode(){
-        return statusCode;
-    }
 }

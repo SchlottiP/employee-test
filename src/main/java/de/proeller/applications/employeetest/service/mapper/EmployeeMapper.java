@@ -6,6 +6,10 @@ import de.proeller.applications.employeetest.controller.dto.UpdateEmployeeReques
 import de.proeller.applications.employeetest.model.Employee;
 import org.springframework.stereotype.Component;
 
+/**
+ * No Unit test for this because it's only using the mapper -
+ * a test would only repeat the code
+ */
 @Component
 public class EmployeeMapper {
 
