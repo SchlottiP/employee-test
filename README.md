@@ -1,9 +1,9 @@
 TODO: 
-- validierung? 
 - Wie Error Handling? 
 - Testing?
-- Wie teste ich den Kafka richtig?
-- verschiedene sinnvolle Kafka Events
+- Transactions das nichts gespüeichert wird wenn der Kafka nicht verfügbar ist
+- Logging? 
+- cucumber tests?
 
 - Kafka: 
   - Create update und delete event typ
