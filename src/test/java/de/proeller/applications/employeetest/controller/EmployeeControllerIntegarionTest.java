@@ -14,15 +14,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -31,7 +28,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
-class EmployeeControllerTests {
+class EmployeeControllerIntegrationTests {
 
     private MockMvc mockMvc;
 
@@ -119,7 +116,7 @@ class EmployeeControllerTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateDto)))
                 .andExpect(status().isBadRequest())
-     //           .andExpect(jsonPath("$.errors.email").exists())
+    //            .andExpect(jsonPath("$.errors.email").exists())
                 .andReturn();
         String jsonResponse = mvcResult.getResponse().getContentAsString();
         System.out.println("Response: " + jsonResponse);
