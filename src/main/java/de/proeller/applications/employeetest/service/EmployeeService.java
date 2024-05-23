@@ -6,14 +6,13 @@ import de.proeller.applications.employeetest.controller.dto.UpdateEmployeeReques
 import de.proeller.applications.employeetest.exception.CustomRuntimeException;
 import de.proeller.applications.employeetest.kafka.EmployeeEvent;
 import de.proeller.applications.employeetest.kafka.EmployeeEventType;
-import de.proeller.applications.employeetest.kafka.KafkaProducer;
+import de.proeller.applications.employeetest.kafka.MessageProducerService;
 import de.proeller.applications.employeetest.model.Employee;
 import de.proeller.applications.employeetest.repository.EmployeeRepository;
 import de.proeller.applications.employeetest.service.mapper.EmployeeMapper;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,14 +24,14 @@ public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
 
-    private final KafkaProducer kafkaProducer;
+    private final MessageProducerService messageProducerService;
 
     private final EmployeeMapper employeeMapper;
 
     @Autowired
-    public EmployeeService(EmployeeRepository employeeRepository, KafkaProducer kafkaProducer, EmployeeMapper employeeMapper) {
+    public EmployeeService(EmployeeRepository employeeRepository, MessageProducerService messageProducerService, EmployeeMapper employeeMapper) {
         this.employeeRepository = employeeRepository;
-        this.kafkaProducer = kafkaProducer;
+        this.messageProducerService = messageProducerService;
         this.employeeMapper = employeeMapper;
     }
 
@@ -41,7 +40,7 @@ public class EmployeeService {
         Employee employeeEntityToSave = employeeMapper.toEntity(toCreate);
         validateIfEmployeeMailAlreadyExists(employeeEntityToSave.getEmail());
         Employee savedEmployee = employeeRepository.save(employeeEntityToSave);
-        kafkaProducer.sendMessage(EmployeeEvent.builder().employeeEventType(EmployeeEventType.CREATE).employee(savedEmployee).build());
+        messageProducerService.sendMessage(EmployeeEvent.builder().employeeEventType(EmployeeEventType.CREATE).employee(savedEmployee).build());
         return employeeMapper.toResponseDto(savedEmployee);
     }
 
@@ -71,7 +70,7 @@ public class EmployeeService {
             employee.setHobbies(employeeDetails.getHobbies());
         }
         Employee updatedEmployee = employeeRepository.save(employee);
-        kafkaProducer.sendMessage(EmployeeEvent.builder().employeeEventType(EmployeeEventType.UPDATE).employee(updatedEmployee).build());
+        messageProducerService.sendMessage(EmployeeEvent.builder().employeeEventType(EmployeeEventType.UPDATE).employee(updatedEmployee).build());
         return employeeMapper.toResponseDto(updatedEmployee);
     }
 
@@ -80,7 +79,7 @@ public class EmployeeService {
         Optional<Employee> employeeToDelete = employeeRepository.findById(id);
         if(employeeToDelete.isPresent()) {
             employeeRepository.deleteById(id);
-            kafkaProducer.sendMessage(EmployeeEvent.builder().employeeEventType(EmployeeEventType.UPDATE).employee(employeeToDelete.get()).build());
+            messageProducerService.sendMessage(EmployeeEvent.builder().employeeEventType(EmployeeEventType.DELETE).employee(employeeToDelete.get()).build());
         }
     }
     private void validateIfEmployeeMailAlreadyExists(String email) {

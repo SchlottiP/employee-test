@@ -3,7 +3,6 @@ package de.proeller.applications.employeetest.kafka;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.event.KafkaEvent;
 import org.springframework.stereotype.Service;
 
 /**
@@ -11,7 +10,7 @@ import org.springframework.stereotype.Service;
  * because it uses straight forward the kafka template
  */
 @Service
-public class KafkaProducer {
+public class MessageProducerService {
 
     @Value("${messaging.kafka.topic}")
     private String topic;
@@ -19,7 +18,7 @@ public class KafkaProducer {
     private final KafkaTemplate<String, EmployeeEvent> kafkaTemplate;
 
     @Autowired
-    public KafkaProducer(KafkaTemplate<String, EmployeeEvent> kafkaTemplate) {
+    public MessageProducerService(KafkaTemplate<String, EmployeeEvent> kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
     }
 

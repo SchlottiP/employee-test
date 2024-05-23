@@ -6,7 +6,7 @@ import de.proeller.applications.employeetest.controller.dto.EmployeeResponseDto;
 import de.proeller.applications.employeetest.controller.dto.UpdateEmployeeRequestDto;
 import de.proeller.applications.employeetest.exception.CustomRuntimeException;
 import de.proeller.applications.employeetest.kafka.EmployeeEvent;
-import de.proeller.applications.employeetest.kafka.KafkaProducer;
+import de.proeller.applications.employeetest.kafka.MessageProducerService;
 import de.proeller.applications.employeetest.model.Employee;
 import de.proeller.applications.employeetest.repository.EmployeeRepository;
 import de.proeller.applications.employeetest.service.mapper.EmployeeMapper;
@@ -17,7 +17,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -46,7 +45,7 @@ class EmployeeServiceUnitTest {
     private EmployeeMapper employeeMapper;
 
     @Mock
-    private KafkaProducer kafkaProducer;
+    private MessageProducerService messageProducerService;
 
     @InjectMocks
     private EmployeeService employeeService;
@@ -81,7 +80,7 @@ class EmployeeServiceUnitTest {
 
         assertNotNull(responseDto);
         verify(employeeRepository, times(1)).save(any(Employee.class));
-        verify(kafkaProducer, times(1)).sendMessage(any(EmployeeEvent.class));
+        verify(messageProducerService, times(1)).sendMessage(any(EmployeeEvent.class));
     }
 
     @Test
@@ -162,7 +161,7 @@ class EmployeeServiceUnitTest {
 
         assertNotNull(responseDto);
         verify(employeeRepository, times(1)).save(any(Employee.class));
-        verify(kafkaProducer, times(1)).sendMessage(any(EmployeeEvent.class));
+        verify(messageProducerService, times(1)).sendMessage(any(EmployeeEvent.class));
     }
 
         @Test
@@ -186,7 +185,7 @@ class EmployeeServiceUnitTest {
 
             assertNotNull(responseDto);
             verify(employeeRepository, times(1)).save(any(Employee.class));
-            verify(kafkaProducer, times(1)).sendMessage(any(EmployeeEvent.class));
+            verify(messageProducerService, times(1)).sendMessage(any(EmployeeEvent.class));
         }
 
     @Test
@@ -198,7 +197,7 @@ class EmployeeServiceUnitTest {
         CustomRuntimeException exception = assertThrows(CustomRuntimeException.class, () -> employeeService.updateEmployee(UUID.randomUUID(), updateDTO));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         verify(employeeRepository, times(0)).save(any(Employee.class));
-        verify(kafkaProducer, times(0)).sendMessage(any(EmployeeEvent.class));
+        verify(messageProducerService, times(0)).sendMessage(any(EmployeeEvent.class));
     }
 
     @Test
@@ -229,7 +228,7 @@ class EmployeeServiceUnitTest {
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
 
         verify(employeeRepository, times(0)).save(any(Employee.class));
-        verify(kafkaProducer, times(0)).sendMessage(any(EmployeeEvent.class));
+        verify(messageProducerService, times(0)).sendMessage(any(EmployeeEvent.class));
     }
     }
 
@@ -256,7 +255,7 @@ class EmployeeServiceUnitTest {
         assertNotNull(response);
 
         verify(employeeRepository, times(1)).save(any(Employee.class));
-        verify(kafkaProducer, times(1)).sendMessage(any(EmployeeEvent.class));
+        verify(messageProducerService, times(1)).sendMessage(any(EmployeeEvent.class));
     }
 
     @Nested
@@ -269,7 +268,7 @@ class EmployeeServiceUnitTest {
             when(employeeRepository.findById(id)).thenReturn(Optional.ofNullable(Employee.builder().build()));
             employeeService.deleteEmployee(id);
             verify(employeeRepository, times(1)).deleteById(id);
-            verify(kafkaProducer, times(1)).sendMessage(any(EmployeeEvent.class));
+            verify(messageProducerService, times(1)).sendMessage(any(EmployeeEvent.class));
         }
     }
 }
