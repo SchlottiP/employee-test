@@ -16,10 +16,12 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -51,7 +53,8 @@ public class EmployeeApplicationE2ETest {
 
         mockMvc.perform(post("/api/employees")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDto)))
+                        .content(objectMapper.writeValueAsString(requestDto))
+                        .with(httpBasic("user", "password")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value(requestDto.getEmail()))
                 .andExpect(jsonPath("$.fullName").value("John Doe"));
@@ -75,7 +78,8 @@ public class EmployeeApplicationE2ETest {
 
         mockMvc.perform(post("/api/employees")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(toCreate)))
+                        .content(objectMapper.writeValueAsString(toCreate))
+                        .with(httpBasic("user", "password")))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message")
                         .value(Matchers.containsString("E-Mail Address is already in use")));
@@ -96,7 +100,8 @@ public class EmployeeApplicationE2ETest {
 
         mockMvc.perform(put("/api/employees/" + savedEmployee.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDto)))
+                        .content(objectMapper.writeValueAsString(requestDto))
+                        .with(httpBasic("user", "password")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value(requestDto.getEmail()));
     }
@@ -112,10 +117,61 @@ public class EmployeeApplicationE2ETest {
         employeeRepository.save(employee);
 
 
-        mockMvc.perform(delete("/api/employees/" + employee.getId()))
+        mockMvc.perform(delete("/api/employees/" + employee.getId())
+                .with(httpBasic("user", "password")))
                 .andExpect(status().isNoContent());
 
-        mockMvc.perform(get("/api/employees/" + employee.getId()))
+        mockMvc.perform(get("/api/employees/" + employee.getId())
+                        .with(httpBasic("user", "password")))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void testCreateEmployee_Unauthenticated() throws Exception {
+        CreateEmployeeRequestDto requestDto = CreateEmployeeRequestDto.builder()
+                .email(TestUtil.createRandomEmailAddress())
+                .fullName("John Doe")
+                .birthday(LocalDate.of(1990, 1, 1))
+                .hobbies(List.of("Music", "Sports")).build();
+
+        mockMvc.perform(post("/api/employees")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDto)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void testGetAllEmployees_Unauthenticated() throws Exception {
+        mockMvc.perform(get("/api/employees"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void testGetEmployeeById_Unauthenticated() throws Exception {
+        UUID employeeId = UUID.randomUUID();
+        mockMvc.perform(get("/api/employees/{id}", employeeId))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void testUpdateEmployee_Unauthenticated() throws Exception {
+        UUID employeeId = UUID.randomUUID();
+        UpdateEmployeeRequestDto requestDto = UpdateEmployeeRequestDto.builder()
+                .email("newemail@example.com")
+                .fullName("John Updated Doe")
+                .birthday(LocalDate.of(1990, 1, 1))
+                .hobbies(List.of("Reading", "Writing")).build();
+
+        mockMvc.perform(put("/api/employees/{id}", employeeId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDto)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void testDeleteEmployee_Unauthenticated() throws Exception {
+        UUID employeeId = UUID.randomUUID();
+        mockMvc.perform(delete("/api/employees/{id}", employeeId))
+                .andExpect(status().isUnauthorized());
     }
 }
