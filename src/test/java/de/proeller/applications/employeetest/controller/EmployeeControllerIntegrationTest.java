@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
-class EmployeeControllerIntegrationTests {
+class EmployeeControllerIntegrationTest {
 
     private MockMvc mockMvc;
 
@@ -116,7 +116,7 @@ class EmployeeControllerIntegrationTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateDto)))
                 .andExpect(status().isBadRequest())
-    //            .andExpect(jsonPath("$.errors.email").exists())
+                .andExpect(jsonPath("$.errors.email").exists())
                 .andReturn();
         String jsonResponse = mvcResult.getResponse().getContentAsString();
         System.out.println("Response: " + jsonResponse);

@@ -39,7 +39,7 @@ public class EmployeeService {
     @Transactional
     public EmployeeResponseDto createEmployee(CreateEmployeeRequestDto toCreate) {
         Employee employeeEntityToSave = employeeMapper.toEntity(toCreate);
-        validateIfEmployeeMailAlreadyExists(employeeEntityToSave);
+        validateIfEmployeeMailAlreadyExists(employeeEntityToSave.getEmail());
         Employee savedEmployee = employeeRepository.save(employeeEntityToSave);
         kafkaProducer.sendMessage(EmployeeEvent.builder().employeeEventType(EmployeeEventType.CREATE).employee(savedEmployee).build());
         return employeeMapper.toResponseDto(savedEmployee);
@@ -57,8 +57,9 @@ public class EmployeeService {
     public EmployeeResponseDto updateEmployee(UUID id, UpdateEmployeeRequestDto employeeDetails) {
         Employee employee = employeeRepository.findById(id).orElseThrow(() -> new CustomRuntimeException(HttpStatus.NOT_FOUND, "No Employee with id %s found".formatted(id), "Employee is not existing"));
         if (employeeDetails.getEmail() != null && !employeeDetails.getEmail().equals(employee.getEmail())) {
+
+            validateIfEmployeeMailAlreadyExists(employeeDetails.getEmail());
             employee.setEmail(employeeDetails.getEmail());
-            validateIfEmployeeMailAlreadyExists(employee);
         }
         if (employeeDetails.getFullName() != null) {
             employee.setFullName(employeeDetails.getFullName());
@@ -82,8 +83,8 @@ public class EmployeeService {
             kafkaProducer.sendMessage(EmployeeEvent.builder().employeeEventType(EmployeeEventType.UPDATE).employee(employeeToDelete.get()).build());
         }
     }
-    private void validateIfEmployeeMailAlreadyExists(Employee employee) {
-        Optional<Employee> alreadyExisting = employeeRepository.findByEmail(employee.getEmail());
+    private void validateIfEmployeeMailAlreadyExists(String email) {
+        Optional<Employee> alreadyExisting = employeeRepository.findByEmail(email);
         if(alreadyExisting.isPresent()){
             throw new CustomRuntimeException(HttpStatus.CONFLICT, "Email-Address is already used by user with id " + alreadyExisting.get().getId(), "E-Mail Address is already in use.");
         }

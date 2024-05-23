@@ -4,11 +4,10 @@ import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 
+@Getter
 public class CustomRuntimeException extends RuntimeException {
 
-    @Getter
     private final String userMessage;
-    @Getter
     private final HttpStatusCode statusCode;
 
     public CustomRuntimeException(String logMessage, String userMessage) {

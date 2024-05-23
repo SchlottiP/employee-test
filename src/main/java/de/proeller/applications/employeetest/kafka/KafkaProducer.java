@@ -24,6 +24,6 @@ public class KafkaProducer {
     }
 
     public void sendMessage(EmployeeEvent message) {
-        kafkaTemplate.send(topic, message);
+        kafkaTemplate.send(topic, message.getEmployee().getId().toString(), message);
     }
 }
