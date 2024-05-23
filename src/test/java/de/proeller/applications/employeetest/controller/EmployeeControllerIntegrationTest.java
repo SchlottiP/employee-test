@@ -6,6 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import de.proeller.applications.employeetest.controller.dto.CreateEmployeeRequestDto;
 import de.proeller.applications.employeetest.controller.dto.EmployeeResponseDto;
 import de.proeller.applications.employeetest.controller.dto.UpdateEmployeeRequestDto;
+import de.proeller.applications.employeetest.exception.GlobalExceptionHandler;
 import de.proeller.applications.employeetest.service.EmployeeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,7 +43,7 @@ class EmployeeControllerIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(employeeController).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(employeeController).setControllerAdvice(new GlobalExceptionHandler()).build();
         objectMapper.registerModule(new JavaTimeModule());
     }
 
@@ -112,15 +113,12 @@ class EmployeeControllerIntegrationTest {
                 .fullName("Jane Doe").build();
 
 
-        MvcResult mvcResult = mockMvc.perform(put("/api/employees/{id}", employeeId)
+        mockMvc.perform(put("/api/employees/{id}", employeeId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateDto)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors.email").exists())
-                .andReturn();
-        String jsonResponse = mvcResult.getResponse().getContentAsString();
-        System.out.println("Response: " + jsonResponse);
-    }
+                .andExpect(jsonPath("$.errors.email").exists());
+        }
 
 
     @Test

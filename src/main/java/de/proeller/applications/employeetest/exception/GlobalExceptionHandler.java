@@ -1,20 +1,20 @@
 package de.proeller.applications.employeetest.exception;
 
-import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.validation.FieldError;
+
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.util.HashMap;
@@ -37,25 +37,24 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach((error) -> {
-            String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
-        });
-        logger.error("Validation error: {}", errors);
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<Map<String, Map<String,List<String>>>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        Map<String, List<String>> errors = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .collect(Collectors.groupingBy(FieldError::getField,
+                        Collectors.mapping(FieldError::getDefaultMessage, Collectors.toList())));
+        return new ResponseEntity<>(Map.of("errors",errors), new HttpHeaders(), HttpStatus.BAD_REQUEST);
     }
 
 
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Object> handleAllExceptions(Exception ex, WebRequest request) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("timestamp", System.currentTimeMillis());
-        body.put("message", "An unexpected error occurred");
-        logger.error(ex.getMessage(), ex);
-        return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+public ResponseEntity<Object> handleAllExceptions(Exception ex, WebRequest request) {
+    Map<String, Object> body = new HashMap<>();
+    body.put("timestamp", System.currentTimeMillis());
+    body.put("message", "An unexpected error occurred");
+    logger.error(ex.getMessage(), ex);
+    return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
+}
 }
