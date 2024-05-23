@@ -2,7 +2,6 @@ package de.proeller.applications.employeetest.service.mapper;
 
 import de.proeller.applications.employeetest.controller.dto.CreateEmployeeRequestDto;
 import de.proeller.applications.employeetest.controller.dto.EmployeeResponseDto;
-import de.proeller.applications.employeetest.controller.dto.UpdateEmployeeRequestDto;
 import de.proeller.applications.employeetest.model.Employee;
 import org.springframework.stereotype.Component;
 

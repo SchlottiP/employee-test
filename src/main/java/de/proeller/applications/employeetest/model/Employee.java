@@ -20,7 +20,7 @@ public class Employee {
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(
             name = "UUID",
-            strategy = "org.hibernate.id.UUIDGenerator"
+            type = org.hibernate.id.uuid.UuidGenerator.class
     )
     @Column(updatable = false, nullable = false)
     private UUID id;

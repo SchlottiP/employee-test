@@ -3,7 +3,6 @@ package de.proeller.applications.employeetest.controller;
 import de.proeller.applications.employeetest.controller.dto.CreateEmployeeRequestDto;
 import de.proeller.applications.employeetest.controller.dto.EmployeeResponseDto;
 import de.proeller.applications.employeetest.controller.dto.UpdateEmployeeRequestDto;
-import de.proeller.applications.employeetest.model.Employee;
 import de.proeller.applications.employeetest.service.EmployeeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

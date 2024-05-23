@@ -84,6 +84,7 @@ class EmployeeServiceUnitTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     void createSameEmailTwice() {
         CreateEmployeeRequestDto dto1 = CreateEmployeeRequestDto.builder()
                 .email(TestUtil.createRandomEmailAddress())
