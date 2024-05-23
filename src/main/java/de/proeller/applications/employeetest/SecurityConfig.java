@@ -2,6 +2,7 @@ package de.proeller.applications.employeetest;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -19,7 +20,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(
                         authorize -> authorize
                                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                                .anyRequest().authenticated()
+                                .requestMatchers(HttpMethod.POST, "/api/employees/**").authenticated()
+                                .requestMatchers(HttpMethod.PUT, "/api/employees/**").authenticated()
+                                .requestMatchers(HttpMethod.DELETE, "/api/employees/**").authenticated()
+                                .requestMatchers(HttpMethod.GET, "/api/employees/**").permitAll()
+
                 )
                 .httpBasic(Customizer.withDefaults());
 

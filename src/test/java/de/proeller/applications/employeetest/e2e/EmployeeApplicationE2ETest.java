@@ -168,14 +168,17 @@ public class EmployeeApplicationE2ETest {
     @Test
     void testGetAllEmployees_Unauthenticated() throws Exception {
         mockMvc.perform(get("/api/employees"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isOk());
+        ConsumerRecord<String, EmployeeEvent> received = records.poll(5, TimeUnit.SECONDS);
+        assertThat(received).isNull();
     }
 
     @Test
     void testGetEmployeeById_Unauthenticated() throws Exception {
+        // Authenticates Successfully, id just not in db
         UUID employeeId = UUID.randomUUID();
         mockMvc.perform(get("/api/employees/{id}", employeeId))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isNotFound());
         ConsumerRecord<String, EmployeeEvent> received = records.poll(5, TimeUnit.SECONDS);
         assertThat(received).isNull();
     }
