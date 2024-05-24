@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static de.proeller.applications.employeetest.TestUtil.setUpKafkaConsumer;
@@ -26,10 +27,12 @@ public class MessageProducerServiceIntegrationTest {
 
     private BlockingQueue<ConsumerRecord<String, EmployeeEvent>> records;
 
+    private CountDownLatch latch;
 
     @BeforeEach
     void setUp() {
-        records = setUpKafkaConsumer();
+        latch = new CountDownLatch(1);
+        records = setUpKafkaConsumer(latch);
     }
 
 
@@ -39,7 +42,9 @@ public class MessageProducerServiceIntegrationTest {
         EmployeeEvent event = new EmployeeEvent(employee, EmployeeEventType.CREATE);
         messageProducerService.sendMessage(event);
 
-        ConsumerRecord<String, EmployeeEvent> received = records.poll(10, TimeUnit.SECONDS);
+        boolean messageReceived = latch.await(5, TimeUnit.SECONDS);
+        assertThat(messageReceived).isTrue();
+        ConsumerRecord<String, EmployeeEvent> received = records.poll();
         assertThat(received).isNotNull();
         assertThat(received.value()).isEqualTo(event);
     }

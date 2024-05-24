@@ -10,11 +10,6 @@ public class CustomRuntimeException extends RuntimeException {
     private final String userMessage;
     private final HttpStatusCode statusCode;
 
-    public CustomRuntimeException(String logMessage, String userMessage) {
-        super(logMessage);
-        this.userMessage = userMessage;
-        this.statusCode = HttpStatus.BAD_REQUEST;
-    }
     public CustomRuntimeException(HttpStatusCode statusCode, String logMessage, String userMessage) {
         super(logMessage);
         this.statusCode = statusCode;

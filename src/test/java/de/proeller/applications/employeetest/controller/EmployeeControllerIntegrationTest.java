@@ -42,12 +42,13 @@ class EmployeeControllerIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(employeeController).setControllerAdvice(new GlobalExceptionHandler()).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(employeeController)
+                .setControllerAdvice(new GlobalExceptionHandler()).build();
         objectMapper.registerModule(new JavaTimeModule());
     }
 
     @Test
-    void testCreateEmployee() throws Exception {
+    void createEmployee() throws Exception {
         CreateEmployeeRequestDto requestDto = CreateEmployeeRequestDto.builder()
                 .email("test@example.com")
                 .fullName("John Doe")
@@ -70,7 +71,7 @@ class EmployeeControllerIntegrationTest {
     }
 
     @Test
-    void testGetEmployeeById() throws Exception {
+    void employeeById() throws Exception {
         UUID employeeId = UUID.randomUUID();
         EmployeeResponseDto responseDto = EmployeeResponseDto.builder().id(employeeId)
                 .email("test@example.com")
@@ -84,7 +85,7 @@ class EmployeeControllerIntegrationTest {
     }
 
     @Test
-    void testUpdateEmployee() throws Exception {
+    void updateEmployee() throws Exception {
         UUID employeeId = UUID.randomUUID();
         UpdateEmployeeRequestDto updateDto = UpdateEmployeeRequestDto.builder().
                 email("update@example.com")
@@ -105,7 +106,7 @@ class EmployeeControllerIntegrationTest {
     }
 
     @Test
-    void testUpdateEmployee_invalidEmail() throws Exception {
+    void updateEmployee_invalidEmail() throws Exception {
         UUID employeeId = UUID.randomUUID();
         UpdateEmployeeRequestDto updateDto = UpdateEmployeeRequestDto.builder().
                 email("InValid")
@@ -121,7 +122,7 @@ class EmployeeControllerIntegrationTest {
 
 
     @Test
-    void testDeleteEmployee() throws Exception {
+    void deleteEmployee() throws Exception {
         UUID employeeId = UUID.randomUUID();
 
         willDoNothing().given(employeeService).deleteEmployee(employeeId);

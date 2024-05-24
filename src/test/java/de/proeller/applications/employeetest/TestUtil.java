@@ -15,6 +15,7 @@ import org.springframework.kafka.support.serializer.JsonDeserializer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class TestUtil {
@@ -22,7 +23,7 @@ public class TestUtil {
         return RandomStringUtils.randomAlphabetic(5)+ "@" + RandomStringUtils.randomAlphabetic(6) + ".com";
     }
 
-    public static BlockingQueue<ConsumerRecord<String, EmployeeEvent>> setUpKafkaConsumer() {
+    public static BlockingQueue<ConsumerRecord<String, EmployeeEvent>> setUpKafkaConsumer(CountDownLatch latch) {
         Map<String, Object> consumerProps = new HashMap<>();
         consumerProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:29092");
         consumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, "employee-group");
@@ -36,7 +37,10 @@ public class TestUtil {
         ContainerProperties containerProperties = new ContainerProperties("employee-topic");
         ConcurrentMessageListenerContainer<String, EmployeeEvent> container = new ConcurrentMessageListenerContainer<>(consumerFactory, containerProperties);
         BlockingQueue<ConsumerRecord<String, EmployeeEvent>> records = new LinkedBlockingQueue<>();
-        container.setupMessageListener((MessageListener<String, EmployeeEvent>) records::add);
+        container.setupMessageListener((MessageListener<String, EmployeeEvent>) record -> {
+            records.add(record);
+            latch.countDown();
+        });
         container.start();
         return records;
     }
